@@ -1,6 +1,6 @@
 ﻿namespace QuanLyBanHoa.Modules
 {
-    partial class DangNhap
+    partial class frmDangNhap
     {
         /// <summary>
         /// Required designer variable.
@@ -28,7 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(DangNhap));
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(frmDangNhap));
             panel1 = new Panel();
             label5 = new Label();
             btnDangNhap = new Button();

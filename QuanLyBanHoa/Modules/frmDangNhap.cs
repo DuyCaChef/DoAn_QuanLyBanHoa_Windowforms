@@ -7,13 +7,12 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using static System.Collections.Specialized.BitVector32;
 
 namespace QuanLyBanHoa.Modules
 {
-    public partial class DangNhap : Form
+    public partial class frmDangNhap : Form
     {
-        public DangNhap()
+        public frmDangNhap()
         {
             InitializeComponent();
         }
@@ -22,6 +21,21 @@ namespace QuanLyBanHoa.Modules
         {
             string username = txtEmail.Text.Trim();
             string password = txtPass.Text.Trim();
+
+            // Kiểm tra thông tin không được để trống
+            if (string.IsNullOrWhiteSpace(username))
+            {
+                MessageBox.Show("Vui lòng nhập email!", "Thiếu thông tin", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                txtEmail.Focus();
+                return;
+            }
+
+            if (string.IsNullOrWhiteSpace(password))
+            {
+                MessageBox.Show("Vui lòng nhập mật khẩu!", "Thiếu thông tin", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                txtPass.Focus();
+                return;
+            }
 
             //Tài khoản cố định cho admin và nhân viên
             string adminUsername = "admin123@gmail.com";
@@ -39,9 +53,10 @@ namespace QuanLyBanHoa.Modules
 
                 MessageBox.Show("Đăng nhập thành công với quyền Admin!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
 
-                //FrmMain frmMain = new FrmMain();  Mở form chính
-                //frmMain.Show();
-                //this.Hide(); //Ẩn form đăng nhập
+                // Mở form Hoa
+                Hoa frmHoa = new Hoa();
+                frmHoa.Show();
+                this.Hide(); // Ẩn form đăng nhập
             }
             else if (username == staffUsername && password == staffPassword)
             {
@@ -51,26 +66,33 @@ namespace QuanLyBanHoa.Modules
 
                 MessageBox.Show("Đăng nhập thành công với vai trò Nhân viên!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
 
-                //FrmMain frmMain = new FrmMain();  Mở form chính
-                //frmMain.Show();
-                //this.Hide(); //Ẩn form đăng nhập
+                // Mở form Hoa
+                Hoa frmHoa = new Hoa();
+                frmHoa.Show();
+                this.Hide(); // Ẩn form đăng nhập
             }
             else
             {
                 MessageBox.Show("Tên đăng nhập hoặc mật khẩu không đúng. Vui lòng thử lại.", "Lỗi đăng nhập", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                txtPass.Clear();
+                txtPass.Focus();
             }
-
         }
 
         private void ckbHienMK_CheckedChanged(object sender, EventArgs e)
         {
-            if (ckbHienMK.Checked)
+            txtPass.UseSystemPasswordChar = !ckbHienMK.Checked;
+        }
+
+        // Xử lý sự kiện khi form Hoa đóng lại
+        protected override void OnFormClosing(FormClosingEventArgs e)
+        {
+            base.OnFormClosing(e);
+            
+            // Nếu đang đăng nhập và đóng form đăng nhập thì thoát ứng dụng
+            if (!Session.IsLoggedIn)
             {
-                txtPass.UseSystemPasswordChar = false; //Hiện mật khẩu
-            }
-            else
-            {
-                txtPass.UseSystemPasswordChar = true; //Ẩn mật khẩu
+                Application.Exit();
             }
         }
     }

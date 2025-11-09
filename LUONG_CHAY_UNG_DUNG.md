@@ -1,0 +1,399 @@
+# ?? LU?NG CH?Y ?NG D?NG QU?N LÝ BÁN HOA
+
+## ?? T?ng quan lu?ng ch?y
+
+```
+[Start Application] 
+    ?
+[Form ??ng Nh?p (frmDangNhap)]
+    ?
+[Nh?p tài kho?n & m?t kh?u]
+    ?
+[Ki?m tra ??ng nh?p]
+    ?? ? ?úng ? L?u Session ? M? Form Hoa ? ?n Form ??ng Nh?p
+    ?? ? Sai ? Hi?n th? l?i ? Yêu c?u nh?p l?i
+    ?
+[Form Hoa (Hoa)]
+    ?
+[Qu?n lý hoa: Thêm/S?a/Xóa/Tìm ki?m]
+    ?
+[?óng Form Hoa]
+    ?
+[Xác nh?n ??ng xu?t]
+    ?? Yes ? Clear Session ? Hi?n th? l?i Form ??ng Nh?p
+    ?? No ? Ti?p t?c làm vi?c
+```
+
+## ?? Chi ti?t t?ng b??c
+
+### 1?? Kh?i ??ng ?ng d?ng (Program.cs)
+
+```csharp
+Application.Run(new frmDangNhap());
+```
+
+**Mô t?**: ?ng d?ng b?t ??u b?ng vi?c hi?n th? form ??ng nh?p.
+
+---
+
+### 2?? Form ??ng Nh?p (frmDangNhap.cs)
+
+#### Giao di?n:
+- TextBox: `txtEmail` - Nh?p email/username
+- TextBox: `txtPass` - Nh?p m?t kh?u (?n)
+- CheckBox: `ckbHienMK` - Hi?n/?n m?t kh?u
+- Button: `btnDangNhap` - Th?c hi?n ??ng nh?p
+
+#### Tài kho?n m?c ??nh:
+| Vai trò | Email | Password |
+|---------|-------|----------|
+| Admin | admin123@gmail.com | admin@123 |
+| Nhân viên | staff123@gmail.com | staff@123 |
+
+#### X? lý ??ng nh?p:
+```csharp
+private void btnDangNhap_Click(object sender, EventArgs e)
+{
+    // 1. Validate input
+    if (empty username or password) ? Show warning
+    
+    // 2. Check credentials
+    if (admin account) {
+        - Save to Session (UserName, Role, IsLoggedIn)
+        - Show success message
+        - Open Form Hoa
+        - Hide Login Form
+    }
+    else if (staff account) {
+        - Save to Session
+        - Show success message
+        - Open Form Hoa
+        - Hide Login Form
+    }
+    else {
+        - Show error
+        - Clear password
+        - Focus password field
+    }
+}
+```
+
+#### Session ???c l?u:
+```csharp
+Session.UserName = "admin123@gmail.com";
+Session.Role = "Admin";
+Session.IsLoggedIn = true;
+```
+
+---
+
+### 3?? Form Hoa (Hoa.cs)
+
+#### Khi form Load:
+```csharp
+private void frmQuanLiHoa_Load(object sender, EventArgs e)
+{
+    // 1. Hi?n th? thông tin user trong title bar
+    this.Text = $"Qu?n Lý Hoa - {Session.Role}: {Session.UserName}";
+    
+    // 2. Load s? l??ng cho ComboBox (1-100)
+    LoadSoLuongCoSan();
+    
+    // 3. Load d? li?u hoa t? database
+    LoadDataToDataGridView();
+    
+    // 4. Setup format cho DataGridView
+    SetupDataGridView();
+    
+    // 5. Set tr?ng thái buttons
+    SetButtonState(false);
+}
+```
+
+#### Các ch?c n?ng chính:
+
+**?? Xem danh sách hoa**
+- T? ??ng load khi form m?
+- Hi?n th? trong DataGridView v?i format ??p
+
+**? Thêm hoa m?i**
+1. Nh?p thông tin: Tên, Giá, S? l??ng, Mô t?
+2. Click nút "Thêm"
+3. Validate d? li?u
+4. Insert vào database MySQL
+5. Refresh DataGridView
+6. Clear form
+
+**?? S?a hoa**
+1. Click ch?n hoa trong DataGridView
+2. Thông tin t? ??ng hi?n th? ? form bên trái
+3. Click nút "S?a" ? Chuy?n sang ch? ?? edit
+4. Ch?nh s?a thông tin
+5. Click nút "L?u"
+6. Update database
+7. Refresh và clear form
+
+**??? Xóa hoa**
+1. Click ch?n hoa c?n xóa
+2. Click nút "Xóa"
+3. Xác nh?n xóa trong dialog
+4. Delete t? database
+5. X? lý l?i foreign key n?u có
+6. Refresh DataGridView
+
+**?? Tìm ki?m**
+1. Nh?p t? khóa vào ô "Tìm ki?m"
+2. Click nút "Tìm"
+3. Tìm theo: Mã hoa, Tên hoa, Mô t?
+4. Hi?n th? k?t qu?
+5. N?u tr?ng ? Load l?i toàn b?
+
+---
+
+### 4?? ?óng Form Hoa & ??ng xu?t
+
+#### Khi click nút "Thoát" ho?c ?óng form:
+```csharp
+private void Hoa_FormClosing(object sender, FormClosingEventArgs e)
+{
+    // 1. Hi?n th? dialog xác nh?n
+    var result = MessageBox.Show(
+        "B?n có mu?n ??ng xu?t và quay l?i màn hình ??ng nh?p?",
+        "Xác nh?n ??ng xu?t",
+        MessageBoxButtons.YesNo);
+    
+    if (result == DialogResult.Yes) {
+        // 2. Clear session
+        Session.Clear();
+        
+        // 3. Tìm và hi?n th? l?i form ??ng nh?p
+        foreach (Form form in Application.OpenForms) {
+            if (form is frmDangNhap) {
+                form.Show();
+                break;
+            }
+        }
+        // 4. Form Hoa s? ?óng
+    }
+    else {
+        // H?y ?óng form, ti?p t?c làm vi?c
+        e.Cancel = true;
+    }
+}
+```
+
+---
+
+## ?? Qu?n lý Session
+
+### Class Session (Models/Session.cs)
+
+```csharp
+public static class Session
+{
+    public static string? UserName { get; set; }
+    public static string? Role { get; set; }
+    public static bool IsLoggedIn { get; set; }
+    public static int UserId { get; set; }
+    
+    public static void Clear()
+    {
+        UserName = null;
+        Role = null;
+        IsLoggedIn = false;
+        UserId = -1;
+    }
+}
+```
+
+### Khi nào Session ???c set?
+- ? Khi ??ng nh?p thành công
+
+### Khi nào Session ???c clear?
+- ? Khi ??ng xu?t (?óng form Hoa)
+- ? Khi ?óng form ??ng nh?p tr??c khi ??ng nh?p
+
+---
+
+## ??? K?t n?i Database
+
+### Connection String (Data/Database.cs)
+
+```csharp
+private static readonly string connectionString =
+    "server=localhost;uid=root;pwd=Duy@2005;database=quanlybanhoa;charset=utf8mb4;";
+```
+
+### Các thao tác database trong Form Hoa:
+
+#### SELECT - Load d? li?u
+```sql
+SELECT MaHoa, TenHoa, Gia, SoLuong, MoTa 
+FROM hoa 
+ORDER BY MaHoa DESC
+```
+
+#### INSERT - Thêm hoa
+```sql
+INSERT INTO hoa (TenHoa, Gia, SoLuong, MoTa) 
+VALUES (@TenHoa, @Gia, @SoLuong, @MoTa)
+```
+
+#### UPDATE - S?a hoa
+```sql
+UPDATE hoa 
+SET TenHoa = @TenHoa, 
+    Gia = @Gia, 
+    SoLuong = @SoLuong, 
+    MoTa = @MoTa 
+WHERE MaHoa = @MaHoa
+```
+
+#### DELETE - Xóa hoa
+```sql
+DELETE FROM hoa 
+WHERE MaHoa = @MaHoa
+```
+
+#### SEARCH - Tìm ki?m
+```sql
+SELECT MaHoa, TenHoa, Gia, SoLuong, MoTa 
+FROM hoa 
+WHERE TenHoa LIKE @Keyword 
+   OR MoTa LIKE @Keyword 
+   OR MaHoa LIKE @Keyword
+ORDER BY MaHoa DESC
+```
+
+---
+
+## ?? X? lý l?i
+
+### 1. L?i k?t n?i Database
+```csharp
+try {
+    using (var conn = Database.GetConnection()) {
+        conn.Open();
+        // ... database operations
+    }
+}
+catch (Exception ex) {
+    MessageBox.Show("L?i t?i d? li?u: " + ex.Message);
+}
+```
+
+### 2. L?i Foreign Key khi xóa
+```csharp
+catch (MySqlException ex) {
+    if (ex.Number == 1451) {
+        MessageBox.Show("Không th? xóa hoa này vì ?ã có ??n hàng liên quan!");
+    }
+}
+```
+
+### 3. Validation Input
+- ? Ki?m tra tr?ng
+- ? Parse giá ti?n (nhi?u format)
+- ? Ki?m tra s? l??ng
+- ? Ki?m tra giá > 0
+
+---
+
+## ?? UI/UX Flow
+
+### Form ??ng Nh?p
+```
+???????????????????????????????
+?   ??NG NH?P H? TH?NG       ?
+???????????????????????????????
+? Email:     [____________]   ?
+? M?t kh?u:  [____________]   ?
+? ? Hi?n m?t kh?u            ?
+?                             ?
+?        [  ??NG NH?P  ]      ?
+???????????????????????????????
+```
+
+### Form Qu?n Lý Hoa
+```
+????????????????????????????????????????????????????
+?  Qu?n Lý Hoa - Admin: admin123@gmail.com         ?
+????????????????????????????????????????????????????
+?  Thông Tin Hoa   ?    Danh Sách Hoa             ?
+?                  ?                               ?
+?  Mã:  [____]     ?  Tìm: [________] [Tìm]       ?
+?  Tên: [____]     ?  ??????????????????????????? ?
+?  Giá: [____]     ?  ? MaHoa | TenHoa | Gia    ? ?
+?  SL:  [?___]     ?  ?   1   | H?ng   | 50,000 ? ?
+?  Mô t?:          ?  ?   2   | Lan    | 200,000? ?
+?  [__________]    ?  ??????????????????????????? ?
+?  [__________]    ?                               ?
+????????????????????????????????????????????????????
+? [Thêm] [S?a] [Xóa] [L?u]           [Thoát]      ?
+????????????????????????????????????????????????????
+```
+
+---
+
+## ?? Test Cases
+
+### TC1: ??ng nh?p thành công
+1. Nh?p email: admin123@gmail.com
+2. Nh?p password: admin@123
+3. Click "??ng nh?p"
+4. ? Hi?n th? message "??ng nh?p thành công"
+5. ? M? form Hoa
+6. ? ?n form ??ng nh?p
+
+### TC2: ??ng nh?p sai m?t kh?u
+1. Nh?p email: admin123@gmail.com
+2. Nh?p password: wrong
+3. Click "??ng nh?p"
+4. ? Hi?n th? "Tên ??ng nh?p ho?c m?t kh?u không ?úng"
+5. ? Clear password field
+6. ? V?n ? form ??ng nh?p
+
+### TC3: Thêm hoa m?i
+1. Nh?p tên: "Hoa H?ng ??"
+2. Nh?p giá: "50000"
+3. Ch?n s? l??ng: 10
+4. Nh?p mô t?: "Hoa h?ng t??i"
+5. Click "Thêm"
+6. ? Thêm vào database
+7. ? Hi?n th? trong DataGridView
+8. ? Clear form
+
+### TC4: ??ng xu?t
+1. Click nút "Thoát" trên form Hoa
+2. Dialog xác nh?n xu?t hi?n
+3. Click "Yes"
+4. ? Clear session
+5. ? Hi?n th? l?i form ??ng nh?p
+6. ? ?óng form Hoa
+
+---
+
+## ?? Tr?ng thái Button
+
+| Tr?ng thái | Thêm | S?a | Xóa | L?u |
+|-----------|------|-----|-----|-----|
+| M?c ??nh | ? | ? | ? | ? |
+| Ch?n 1 dòng | ? | ? | ? | ? |
+| ?ang s?a | ? | ? | ? | ? |
+
+---
+
+## ?? Tóm t?t
+
+1. **Start** ? Form ??ng Nh?p
+2. **Login Success** ? Save Session ? Open Form Hoa (Hide Login Form)
+3. **Work with Flowers** ? CRUD operations with MySQL
+4. **Logout** ? Clear Session ? Show Login Form (Close Hoa Form)
+5. **Exit App** ? Close all forms
+
+**Key Points:**
+- ? Session management ?? l?u tr?ng thái ??ng nh?p
+- ? Form không b? destroy khi Hide, ch? ?n ?i
+- ? Validation ??y ?? cho m?i thao tác
+- ? Try-catch ?? x? lý l?i database
+- ? Confirm dialog cho các thao tác quan tr?ng
